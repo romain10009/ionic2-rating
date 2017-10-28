@@ -26,8 +26,8 @@ export const RATING_CONTROL_VALUE_ACCESSOR: any = {
   template: `
     <ul class="rating" (keydown)="onKeyDown($event)">
       <li *ngFor="let starIndex of starIndexes" tappable (click)="rate(starIndex + 1)">
-        <ion-icon [name]="getStarIconName(starIndex)">
-        </ion-icon>
+        <ion-icon *ngIf="!hasStarUrl()" [name]="getStarIconName(starIndex)"></ion-icon>
+        <img [src]="getStarUrl(starIndex)" *ngIf="hasStarUrl()" alt="">
       </li>
     </ul>`,
   providers: [RATING_CONTROL_VALUE_ACCESSOR]
@@ -37,8 +37,11 @@ export class Ionic2Rating implements ControlValueAccessor {
   _max: number = 5;
   _readOnly: boolean = false;
   _emptyStarIconName: string = 'star-outline';
+  _emptyStarUrl: string = '';
   _halfStarIconName: string = 'star-half';
+  _halfStarUrl: string = '';
   _starIconName: string = 'star';
+  _starUrl: string = '';
   _nullable: boolean = false;
 
   @Input()
@@ -82,6 +85,30 @@ export class Ionic2Rating implements ControlValueAccessor {
   }
 
   @Input()
+  get emptyStarUrl() {
+      return this._emptyStarUrl;
+  }
+  set emptyStarUrl(val: any) {
+      this._emptyStarUrl = val;
+  }
+
+  @Input()
+  get halfStarUrl() {
+      return this._halfStarUrl;
+  }
+  set halfStarUrl(val: any) {
+      this._halfStarUrl = val;
+  }
+
+  @Input()
+  get starUrl() {
+      return this._starUrl;
+  }
+  set starUrl(val: any) {
+      this._starUrl = val;
+  }
+
+  @Input()
   get nullable() {
     return this._nullable;
   }
@@ -97,6 +124,25 @@ export class Ionic2Rating implements ControlValueAccessor {
   ngOnInit() {
     // ngFor needs an array
     this.starIndexes = Array(this.max).fill(1).map((x, i) => i);
+  }
+
+  getStarUrl(starIndex: number){
+      if (this.value === undefined) {
+          return this.emptyStarUrl;
+      }
+
+      if (this.value > starIndex) {
+
+          if (this.value < starIndex + 1) {
+              return this.halfStarUrl;
+
+          } else {
+              return this.starUrl;
+          }
+
+      } else {
+          return this.emptyStarUrl;
+      }
   }
 
   getStarIconName(starIndex: number) {
@@ -116,6 +162,10 @@ export class Ionic2Rating implements ControlValueAccessor {
     } else {
       return this.emptyStarIconName;
     }
+  }
+
+  hasStarUrl(){
+    return this._emptyStarUrl && this._halfStarUrl && this._starUrl;
   }
 
   get value(): any {
